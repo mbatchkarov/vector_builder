@@ -10,9 +10,11 @@ import scipy.sparse as sp
 import pandas as pd
 import six
 from composes.composition.lexical_function import LexicalFunction
+
+from discoutils.tokens import DocumentFeature
+
 from discoutils.io_utils import write_vectors_to_disk, write_vectors_to_hdf
 from discoutils.thesaurus_loader import Thesaurus, Vectors
-from discoutils.tokens import DocumentFeature
 from eval.scripts.compress_labelled_data import get_all_document_features
 
 
@@ -451,6 +453,9 @@ def _default_row_filter(feat_str: str, feat_df: DocumentFeature):
     return feat_df.tokens[0].pos in {'N', 'J', 'V'} and feat_df.type == '1-GRAM'
 
 
+#     todo this doesnt work when the data isn't PoS tagged
+
+
 def compose_and_write_vectors(unigram_vectors, short_vector_dataset_name, composer_classes,
                               pretrained_Baroni_composer_file=None, pretrained_Guevara_composer_file=None,
                               pretrained_Gref_composer_file=None, categorical_vector_matrix_file=None,
@@ -501,9 +506,9 @@ def compose_and_write_vectors(unigram_vectors, short_vector_dataset_name, compos
             # compose_all returns all unigrams and composed phrases
             mat, cols, rows = composer.compose_all(phrases_to_compose)
 
-            events_path = os.path.join(output_dir,  # todo name AN_NN no longer appropriate, whatever
-                                       'AN_NN_%s_%s.events.filtered.strings' % (short_vector_dataset_name,
-                                                                                composer.name))
+            events_path = os.path.join(output_dir,
+                                       'composed_%s_%s.events.filtered.strings' % (short_vector_dataset_name,
+                                                                                   composer.name))
             if dense_hd5:
                 write_vectors_to_hdf(mat, rows, cols, events_path)
             else:
