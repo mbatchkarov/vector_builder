@@ -9,12 +9,11 @@ import random
 from os.path import join
 from functools import reduce
 import logging
+
 from gensim.models import Word2Vec
 import numpy as np
 
 sys.path.append('.')
-sys.path.append('..')
-sys.path.append('../..')
 
 from discoutils.misc import mkdirs_if_not_exists, is_gzipped
 from discoutils.tokens import DocumentFeature
@@ -22,8 +21,8 @@ from discoutils.thesaurus_loader import Vectors
 from joblib import Parallel, delayed
 from eval.pipeline.tokenizers import pos_coarsification_map
 from builder.composers.vectorstore import (AdditiveComposer, MultiplicativeComposer,
-                                                   LeftmostWordComposer, RightmostWordComposer,
-                                                   VerbComposer, compose_and_write_vectors)
+                                           LeftmostWordComposer, RightmostWordComposer,
+                                           VerbComposer, compose_and_write_vectors)
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
@@ -105,7 +104,7 @@ def write_gensim_vectors_to_tsv(model, output_path, vocab=None):
     return vectors
 
 
-def reformat_data(conll_data_dir, pos_only_data_dir):
+def reformat_data(conll_data_dir, text_only_data_dir, remove_pos):
     """
     Data formatting
     =========
@@ -127,70 +126,46 @@ def reformat_data(conll_data_dir, pos_only_data_dir):
     Anarchism/N is/V a/DET ....
     ```
     :param conll_data_dir: input directory in CONLL format
-    :param pos_only_data_dir: output directory
+    :param text_only_data_dir: output directory
     """
-    mkdirs_if_not_exists(pos_only_data_dir)
-    Parallel(n_jobs=5)(delayed(_reformat_single_file)(conll_data_dir, filename, pos_only_data_dir) for filename in
-                       os.listdir(conll_data_dir))
+    mkdirs_if_not_exists(text_only_data_dir)
+    Parallel(n_jobs=5)(delayed(_reformat_single_file)(conll_data_dir, filename, text_only_data_dir, remove_pos)
+                       for filename in os.listdir(conll_data_dir))
 
 
-def _reformat_single_file(conll_data_dir, filename, pos_only_data_dir):
-    outfile_name = join(pos_only_data_dir, filename)
+def _reformat_single_file(conll_data_dir, filename, text_only_data_dir, remove_pos):
+    outfile_name = join(text_only_data_dir, filename + '.txt')
     logging.info('Reformatting %s to %s', filename, outfile_name)
-    with gzip.open(join(conll_data_dir, filename)) as infile, gzip.open(outfile_name, 'w') as outfile:
+    with open(join(conll_data_dir, filename)) as infile, open(outfile_name, 'w') as outfile:
         for i, line in enumerate(infile):
-            line = line.decode('utf8')
             if not line.strip():  # conll empty line = sentence boundary
-                outfile.write(b'\n')
+                outfile.write('\n')
                 continue
             try:
                 idx, word, lemma, pos, *rest = line.strip().split('\t')
             except ValueError:
                 # some words in david's data are missing a PoS tag
                 logging.warning('ignoring messed up token in', filename)
-            outfile.write(('%s/%s ' % (lemma.lower(), pos_coarsification_map[pos])).encode())
+            if remove_pos:
+                outfile.write(lemma.lower() + ' ')
+            else:
+                outfile.write('%s/%s ' % (lemma.lower(), pos_coarsification_map[pos]))
 
 
 def compute_and_write_vectors(corpus_name, stages, percent, repeat, remove_pos):
-    prefix = '/lustre/scratch/inf/mmb28/FeatureExtractionToolkit'
-    composed_output_dir = join(prefix, 'word2vec_vectors', 'composed')
-    mkdirs_if_not_exists(composed_output_dir)
+    prefix = os.path.abspath(os.path.join(__file__, '..', '..'))
+    output_dir = join(prefix, 'outputs', 'word2vec')
+    mkdirs_if_not_exists(output_dir)
 
-    if corpus_name == 'gigaw':
-        # inputs
-        conll_data_dir = join(prefix, 'data/gigaword-afe-split-tagged-parsed/gigaword/')
-        # pos_only_data_dir = join(prefix, 'data/gigaword-afe-split-pos/gigaword/')
-        pos_only_data_dir = join(prefix, 'data/gigaword-afe-split-pos/gigaword-small-files/')
-        # outputs
-        if remove_pos:
-            unigram_events_file = join(prefix, 'word2vec_vectors/word2vec-gigaw-nopos-%dperc.unigr.strings')
-        else:
-            unigram_events_file = join(prefix, 'word2vec_vectors/word2vec-gigaw-%dperc.unigr.strings')
-    elif corpus_name == 'wiki':
-        conll_data_dir = None  # wiki data is already in the right format, no point in reformatting
-        pos_only_data_dir = join(prefix, 'data/wikipedia-tagged-pos/wikipedia/')
-        if remove_pos:
-            unigram_events_file = join(prefix, 'word2vec_vectors/word2vec-wiki-nopos-%dperc.unigr.strings')
-        else:
-            unigram_events_file = join(prefix, 'word2vec_vectors/word2vec-wiki-%dperc.unigr.strings')
-    elif corpus_name == 'cwiki':
-        conll_data_dir = None  # wiki data is already in the right format, no point in reformatting
-        pos_only_data_dir = join(prefix, 'data/cwiki-tagged-clean/')
-        if remove_pos:
-            unigram_events_file = join(prefix, 'word2vec_vectors/word2vec-cwiki-nopos-%dperc.unigr.strings')
-        else:
-            unigram_events_file = join(prefix, 'word2vec_vectors/word2vec-cwiki-%dperc.unigr.strings')
-    elif corpus_name == 'giga5':
-        conll_data_dir = None  # wiki data is already in the right format, no point in reformatting
-        pos_only_data_dir = join(prefix, 'data/giga5/')
-        if remove_pos:
-            unigram_events_file = join(prefix, 'word2vec_vectors/word2vec-giga5-nopos-%dperc.unigr.strings')
-        else:
-            unigram_events_file = join(prefix, 'word2vec_vectors/word2vec-giga5-%dperc.unigr.strings')
+    # inputs
+    conll_data_dir = join(prefix, 'data/%s-conll' % corpus_name)
+    # outputs
+    if remove_pos:
+        text_only_data_dir = join(prefix, 'data/%s-nopos' % corpus_name)
+        unigram_events_file = join(output_dir, '%s-nopos-%dperc.unigr.strings'%(corpus_name, percent))
     else:
-        raise ValueError('Unknown corpus %s' % corpus_name)
-
-    unigram_events_file = unigram_events_file % percent  # fill in percentage information
+        text_only_data_dir = join(prefix, 'data/%s' % corpus_name)
+        unigram_events_file = join(output_dir, '%s-%dperc.unigr.strings'%(corpus_name, percent))
 
     if percent > 90 and repeat > 1:
         raise ValueError('Repeating with a different sample of corpus only makes sense when '
@@ -198,10 +173,10 @@ def compute_and_write_vectors(corpus_name, stages, percent, repeat, remove_pos):
                          ' size is fairly small to minimise overlap between samples')
 
     if 'reformat' in stages:
-        reformat_data(conll_data_dir, pos_only_data_dir)
+        reformat_data(conll_data_dir, text_only_data_dir, remove_pos)
 
     if 'vectors' in stages:
-        models = [_train_model(percent, pos_only_data_dir, i, remove_pos) for i in range(repeat)]
+        models = [_train_model(percent, text_only_data_dir, i, remove_pos) for i in range(repeat)]
 
         vectors = []
         # write the output of each run separately
@@ -234,7 +209,7 @@ def compute_and_write_vectors(corpus_name, stages, percent, repeat, remove_pos):
             compose_and_write_vectors(input_thing,
                                       out_path,
                                       composer_algos,
-                                      output_dir=composed_output_dir,
+                                      output_dir=output_dir,
                                       dense_hd5=True)
 
 
@@ -242,7 +217,7 @@ def get_args_from_cmd_line():
     parser = argparse.ArgumentParser()
     parser.add_argument('--stages', choices=('reformat', 'vectors', 'average', 'compose'),
                         required=True, nargs='+')
-    parser.add_argument('--corpus', choices=('gigaw', 'wiki', 'cwiki', 'giga5'), required=True)
+    parser.add_argument('--corpus', choices=('gigaw', 'wiki'), required=True)
     # percent of files to use. SGE makes it easy for this to be 1, 2, ...
     parser.add_argument('--percent', default=100, type=int)
     # multiplier for args.percent. Set to 0.1 to use fractional percentages of corpus
@@ -254,6 +229,4 @@ def get_args_from_cmd_line():
 if __name__ == '__main__':
     args = get_args_from_cmd_line()
     logging.info('Params are: %r', args)
-    if args.remove_pos and args.stages != ['vectors']:
-        raise ValueError('For now lets not do much without a PoS tag, the entire pipeline may collapse.')
     compute_and_write_vectors(args.corpus, args.stages, args.percent, args.repeat, args.remove_pos)
