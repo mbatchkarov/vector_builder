@@ -1,0 +1,7 @@
+cat/N	dog/N	0.8	game/N	0.4
+dog/N	cat/N	0.7	kid/N	0.3
+game/N	play/V	0.6	cat/N	0.04	dog/N	0.03
+kid/N	fruit/N	0.1	cat/N	0.02	dog/N	0.01
+fruit/N	cat/N	0.06	dog/N	0.05
+like/V	play/V	0.11	
+play/V	like/V	0.09
