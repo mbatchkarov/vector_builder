@@ -1,0 +1,7 @@
+[run]
+branch = True
+source = builder
+include = builder/*
+omit =
+    tests/*
+    */setup.py

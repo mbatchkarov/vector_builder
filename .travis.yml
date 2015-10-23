@@ -1,0 +1,31 @@
+# based on http://conda.pydata.org/docs/travis.html
+language: python
+sudo: false
+
+python:
+  - "3.4"
+
+install:
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip numpy scipy scikit-learn cython pandas pytables joblib pytest gensim
+  - source activate test-environment
+  - pip install -U coveralls configobj
+  - pip install git+git://github.com/mbatchkarov/DiscoUtils.git@master
+  - pip install git+git://github.com/mbatchkarov/dc_evaluation.git@master
+  - python setup.py develop
+
+script:
+  - coverage run runtests.py
+  - coverage report
+
+after_success:
+  coveralls
+  
+notifications:
+  email: false
