@@ -4,7 +4,7 @@ from sklearn.feature_selection import SelectKBest, chi2
 import numpy as np
 from sklearn.feature_selection.univariate_selection import _clean_nans
 from discoutils.thesaurus_loader import Vectors
-from thesisgenerator.utils.misc import calculate_log_odds, update_dict_according_to_mask
+from eval.utils.misc import calculate_log_odds, update_dict_according_to_mask
 
 __author__ = 'mmb28'
 

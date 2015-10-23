@@ -15,11 +15,11 @@ from discoutils.reweighting import ppmi_sparse_matrix
 from discoutils.reduce_dimensionality import do_svd
 from discoutils.misc import temp_chdir
 from discoutils.thesaurus_loader import Vectors
-from thesisgenerator.composers.vectorstore import (AdditiveComposer, MultiplicativeComposer,
+from builder.composers.vectorstore import (AdditiveComposer, MultiplicativeComposer,
                                                    LeftmostWordComposer, RightmostWordComposer,
                                                    BaroniComposer, GuevaraComposer, GrefenstetteMultistepComposer,
                                                    compose_and_write_vectors, VerbComposer)
-from thesisgenerator.composers.baroni_group import (train_baroni_guevara_composers,
+from builder.composers.baroni_group import (train_baroni_guevara_composers,
                                                     train_grefenstette_multistep_composer)
 
 """

@@ -1,15 +1,9 @@
 import argparse
 import logging
-import sys
 import os
+from builder.build_phrasal_thesauri_offline import get_corpus_features_cmd_parser
 
-sys.path.append('.')
-sys.path.append('..')
-sys.path.append('../..')
-
-from discoutils.cmd_utils import run_and_log_output
-from thesisgenerator.utils.misc import force_symlink
-
+from discoutils.misc import force_symlink
 
 '''
 If using SVD, symlink the reduced vectors for all unigrams and NPs (done by build_phrasal_..
@@ -31,14 +25,11 @@ def do_work(corpus, features, svd_dims):
 
     # contains SVD-reduced N,J and NP observed vectors, built by other script
     vectors_file = '%s/exp%d-%db/exp%d-with-obs-phrases-SVD%d.events.filtered.strings' % \
-                                  (prefix, corpus, features, corpus, svd_dims)
+                   (prefix, corpus, features, corpus, svd_dims)
     force_symlink(vectors_file, output_file)
 
 
-
 def get_cmd_parser():
-    from thesisgenerator.scripts.build_phrasal_thesauri_offline import get_corpus_features_cmd_parser
-
     parser = argparse.ArgumentParser(parents=[get_corpus_features_cmd_parser()])
     # add options specific to this script here
     group = parser.add_mutually_exclusive_group(required=True)

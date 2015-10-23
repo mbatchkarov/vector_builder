@@ -15,12 +15,11 @@ from scipy.io import loadmat
 from discoutils.tokens import DocumentFeature
 from discoutils.io_utils import write_vectors_to_hdf
 from discoutils.cmd_utils import run_and_log_output
-from discoutils.misc import temp_chdir, mkdirs_if_not_exists
+from discoutils.misc import temp_chdir, mkdirs_if_not_exists, force_symlink
 from discoutils.thesaurus_loader import DenseVectors
-from thesisgenerator.composers.vectorstore import (MultiplicativeComposer, AdditiveComposer,
+from builder.composers.vectorstore import (MultiplicativeComposer, AdditiveComposer,
                                                    RightmostWordComposer, LeftmostWordComposer,
                                                    VerbComposer, compose_and_write_vectors)
-from thesisgenerator.utils.misc import force_symlink
 
 # SET UP A FEW REQUIRED PATHS
 # where are the composed n-gram vectors, must contain parsed.txt, phrases.txt and outVectors.txt
@@ -34,7 +33,7 @@ socher_base_dir = os.path.join(prefix, 'socher_vectors')  # copy downloaded cont
 phrases_to_compose = os.path.join(prefix, '..', 'thesisgenerator',
                                   'features_in_labelled', 'socher.txt')
 socher_input_file = os.path.join(socher_base_dir, 'parsed.txt')
-plaintext_socher_input_file = os.path.join(prefix, '..', 'thesisgenerator',
+plaintext_socher_input_file = os.path.join(prefix, '..', 'eval',
                                            'features_in_labelled', 'all_features.txt')
 
 socher_output_phrases_file = os.path.join(socher_base_dir, 'phrases.txt')

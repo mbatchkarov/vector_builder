@@ -11,7 +11,7 @@ from discoutils.cmd_utils import run_and_log_output
 from discoutils.misc import temp_chdir
 from discoutils.io_utils import write_vectors_to_hdf
 from discoutils.tokens import DocumentFeature
-from thesisgenerator.composers.vectorstore import (RightmostWordComposer, LeftmostWordComposer,
+from builder.composers.vectorstore import (RightmostWordComposer, LeftmostWordComposer,
                                                    MultiplicativeComposer, AdditiveComposer,
                                                    VerbComposer, compose_and_write_vectors)
 

@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal
 from scipy.sparse import csr_matrix, issparse
 import pytest
 
-from thesisgenerator.composers.vectorstore import *
+from builder.composers.vectorstore import *
 from discoutils.tokens import DocumentFeature, Token
 
 DIM = 10

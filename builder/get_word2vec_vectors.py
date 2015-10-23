@@ -20,8 +20,8 @@ from discoutils.misc import mkdirs_if_not_exists, is_gzipped
 from discoutils.tokens import DocumentFeature
 from discoutils.thesaurus_loader import Vectors
 from joblib import Parallel, delayed
-from thesisgenerator.plugins.tokenizers import pos_coarsification_map
-from thesisgenerator.composers.vectorstore import (AdditiveComposer, MultiplicativeComposer,
+from eval.pipeline.tokenizers import pos_coarsification_map
+from builder.composers.vectorstore import (AdditiveComposer, MultiplicativeComposer,
                                                    LeftmostWordComposer, RightmostWordComposer,
                                                    VerbComposer, compose_and_write_vectors)
 

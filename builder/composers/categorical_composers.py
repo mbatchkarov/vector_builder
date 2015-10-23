@@ -10,7 +10,7 @@ import pandas as pd
 from discoutils.thesaurus_loader import Vectors
 from discoutils.tokens import DocumentFeature
 from discoutils.misc import mkdirs_if_not_exists
-from thesisgenerator.composers.vectorstore import (CopyObject, FrobeniusAdd, FrobeniusMult,
+from builder.composers.vectorstore import (CopyObject, FrobeniusAdd, FrobeniusMult,
                                                    compose_and_write_vectors)
 
 VERBS_HDF_DIR = '/lustre/scratch/inf/mmb28/FeatureExtractionToolkit/categorical/'
