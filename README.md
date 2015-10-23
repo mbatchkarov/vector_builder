@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/mbatchkarov/vector_builder.svg?branch=master)](https://travis-ci.org/mbatchkarov/vector_builder)
+[![Coverage Status](https://coveralls.io/repos/mbatchkarov/vector_builder/badge.svg?branch=master&service=github)](https://coveralls.io/github/mbatchkarov/vector_builder?branch=master)
+
 A bunch of utilities for building distributional representations of words and phrases. This code mostly glues together other packages and converts their output to the [same format](https://github.com/mbatchkarov/DiscoUtils). The models included are those considered in my PhD work.
 
 # Prerequisites

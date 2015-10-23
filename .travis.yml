@@ -13,7 +13,7 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip numpy scipy scikit-learn cython pandas pytables joblib pytest gensim
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip numpy scipy scikit-learn cython pandas pytables joblib pytest gensim mock
   - source activate test-environment
   - pip install -U coveralls configobj
   - pip install git+git://github.com/mbatchkarov/DiscoUtils.git@master
