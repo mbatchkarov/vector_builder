@@ -111,12 +111,61 @@ Out[14]:
  - One file, sentence per line. This is what `word2vec` reformatting produces. Reformatting puts the entire file on a single line. This is probably wrong.
 
 ## Counting vectors
+ 
+First extract word co-occurrences with [FeatureExtractorToolkit](https://github.com/MLCL/FeatureExtractionToolkit) or a similar tool. The output needs to look like 
+
+``` 
+ENTRY	FEATURE1	FEATURE2
+```
+
+for instance
+
+
+```
+it/PRON	T:become/V	T:a/DET	T:full-time/J	nsubj-HEAD:tribunal/N
+become/V	cop-HEAD:tribunal/N	T:it/PRON	T:./PUNCT
+a/DET	T:1998/UNK	T:./PUNCT	det-HEAD:tribunal/N
+```
+
+The features can be anything, e.g. word co-occurrences, dependency parse features, etc. We generally prefix proximity/window features with a `T:` and dependency features with their type, e.g. `amod-HEAD:` or `amod-DEP:`. This shows the type of dependency relation and its direction.
+
+Now count and build word with [Byblo](https://github.com/MLCL/Byblo):
+
+```
+python builder/build_phrasal_thesauri_offline.py --conf data/count_features/exp0.conf.txt  --byblo ../FeatureExtractionToolkit/Byblo-2.2.0 --stages unigrams ppmi svd compose  --use-ppmi
+```
+
+You will need:
+
+ - a copy of Byble 2.2 and above
+ - a Byblo configuration file
+
+The file needs to be structured as follows:
+
+```
+--input
+/Volumes/LocalDataHD/m/mm/mmb28/NetBeansProjects/vector_builder/data/count_features/example
+--output
+/Volumes/LocalDataHD/m/mm/mmb28/NetBeansProjects/vector_builder/outputs/count/
+--threads
+4
+--filter-feature-freq
+40
+--filter-event-freq
+15
+```
+
+The input file is what `FeatureExtractionToolkit` produced. Four additional directories will be created (one after each stage of the pipeline):
+
+ - `outputs/count` : raw unweighted high-dimensional vectors. Find the `*events.filtered.strings` file.
+ - `outputs/count-ppmi` : high-dimensional sparse vectors with PPMI reweighting. 
+ - `outputs/count-ppmi-svd` : low-dimensional dense vectors
+ - `outputs/count-ppmi-svd-composed` : low-dimensional composed phrasal vectors
+
+## Socher et al vectors
+
 
 ## Random vectors
 ```
 python builder/generate_random_vectors.py --output random_vect.h5 --dim 50
 ```
-
-# Composition
-
-## Pointwise models
