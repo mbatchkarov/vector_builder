@@ -9,6 +9,7 @@ import numpy as np
 import scipy.sparse as sp
 import pandas as pd
 import six
+
 from composes.composition.lexical_function import LexicalFunction
 
 from discoutils.tokens import DocumentFeature
@@ -449,18 +450,22 @@ class RandomThesaurus(DummyThesaurus):
         return [(str(foo), 1.) for foo in sample(self.vocab, self.k)]
 
 
-def _default_row_filter(feat_str: str, feat_df: DocumentFeature):
+def default_row_filter(feat_str: str, feat_df: DocumentFeature):
     return feat_df.tokens[0].pos in {'N', 'J', 'V'} and feat_df.type == '1-GRAM'
+
+
+def default_row_filter_nopos(feat_str: str, feat_df: DocumentFeature):
+    return feat_str.count('_') == 0 and feat_str.count('/') == 0
 
 
 #     todo this doesnt work when the data isn't PoS tagged
 
 
-def compose_and_write_vectors(unigram_vectors, short_vector_dataset_name, composer_classes,
+def compose_and_write_vectors(unigram_vectors, short_vector_dataset_name, composer_classes, remove_pos= False,
                               pretrained_Baroni_composer_file=None, pretrained_Guevara_composer_file=None,
                               pretrained_Gref_composer_file=None, categorical_vector_matrix_file=None,
                               output_dir='.', gzipped=True, dense_hd5=False,
-                              row_filter=_default_row_filter):
+                              row_filter=default_row_filter):
     """
     Extracts all composable features from a labelled classification corpus and dumps a composed vector for each of them
     to disk. The output file will also contain all unigram vectors that were passed in, and only unigrams!
@@ -474,14 +479,13 @@ def compose_and_write_vectors(unigram_vectors, short_vector_dataset_name, compos
     :type composer_classes: list
     """
 
-    phrases_to_compose = get_all_document_features()
+    phrases_to_compose = get_all_document_features(remove_pos=remove_pos)
     # if this isn't a Vectors object assume it's the name of a file containing vectors and load them
     if not isinstance(unigram_vectors, Vectors):
         # ensure there's only unigrams in the set of unigram vectors
         # composers do not need any ngram vectors contain in this file, they may well be
         # observed ones
         unigram_vectors = Vectors.from_tsv(unigram_vectors,
-                                           # todo enforce_word_entry_pos_format=False??? Why was that needed?
                                            row_filter=row_filter)
         logging.info('Starting composition with %d unigram vectors', len(unigram_vectors))
 

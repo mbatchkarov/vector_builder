@@ -62,7 +62,7 @@ The script also includes options that allow you to:
  - train a model `x` times
  - average vectors across all repetitions
 
-> TODO `--remove-pos` breaks composition
+> Support for the `--remove-pos` flag is inconsistent. The `word2vec` script generally works well if words do not have a PoS tag, but other may fall over in odd ways. 
 
 ## glove
 

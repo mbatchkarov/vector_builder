@@ -22,7 +22,8 @@ from joblib import Parallel, delayed
 from eval.pipeline.tokenizers import pos_coarsification_map
 from builder.composers.vectorstore import (AdditiveComposer, MultiplicativeComposer,
                                            LeftmostWordComposer, RightmostWordComposer,
-                                           VerbComposer, compose_and_write_vectors)
+                                           VerbComposer, compose_and_write_vectors, default_row_filter_nopos,
+                                           default_row_filter)
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
@@ -206,10 +207,13 @@ def compute_and_write_vectors(corpus_name, stages, percent, repeat, remove_pos):
             else:
                 out_path = 'word2vec-%s_%dpercent-rep%d' % (corpus_name, percent, i)
                 input_thing = v if 'vectors' in stages else unigram_events_file + '.rep%d' % i
+            row_filter = default_row_filter_nopos if remove_pos else default_row_filter
             compose_and_write_vectors(input_thing,
                                       out_path,
                                       composer_algos,
                                       output_dir=output_dir,
+                                      row_filter=row_filter,
+                                      remove_pos=remove_pos,
                                       dense_hd5=True)
 
 
