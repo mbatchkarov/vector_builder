@@ -8,6 +8,7 @@ A bunch of utilities for building distributional representations of words and ph
  - [dc_evaluation](https://github.com/mbatchkarov/dc_evaluation) to get lists of words and phrases of interest. Feel free to monkey-patch this.
  - [gensim](https://github.com/piskvorky/gensim/) for `word2vec` vectors
  - [glove](http://nlp.stanford.edu/projects/glove/) for `glove` vectors
+ - configuration files and some text. Download [here](https://www.dropbox.com/s/w9b71zqy5o4tlcp/vector-builder-data.zip?dl=0).
 
 # Building word vectors
 
